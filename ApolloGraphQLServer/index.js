@@ -3,18 +3,25 @@ const { ApolloServer } = require('apollo-server');
 const typeDefs = require('./graphql/schemas');
 const resolvers = require('./graphql/resolvers');
 const DB = require('./config/db');
+const jwt = require('jsonwebtoken');
 
 DB();
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: () => {
-    const myContext = 'Hello';
+  context: ({ req }) => {
+    const token = req.headers['authorization'] || '';
 
-    return {
-      myContext,
-    };
+    if (token !== '') {
+      try {
+        const user = jwt.verify(token, process.env.SECRET_WORD);
+
+        return { user };
+      } catch (error) {
+        console.log(error);
+      }
+    }
   },
 });
 
