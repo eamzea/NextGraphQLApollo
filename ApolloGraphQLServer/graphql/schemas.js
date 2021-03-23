@@ -9,6 +9,11 @@ const typeDef = gql`
     createdAt: String
   }
 
+  type TopExecutive {
+    total: Float
+    executive: [User]
+  }
+
   input UserInput {
     name: String
     lastName: String
@@ -49,6 +54,11 @@ const typeDef = gql`
     company: String
     phone: String
     ref: ID
+  }
+
+  type TopClient {
+    total: Float
+    client: [Client]
   }
 
   input ClientInput {
@@ -103,6 +113,11 @@ const typeDef = gql`
     getExecutiveOrders: [Order]
     getOrder(id: ID!): Order
     getOrderByState(state: String!): [Order]
+
+    #Advanced Queries
+    getBestClients: [TopClient]
+    getBestExecutives: [TopExecutive]
+    getProductByName(text: String!): [Product]
   }
 
   type Mutation {

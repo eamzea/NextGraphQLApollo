@@ -385,6 +385,78 @@ const resolvers = {
         console.log(error);
       }
     },
+    getBestClients: async () => {
+      try {
+        const clients = await OrderModel.aggregate([
+          {
+            $match: { state: 'COMPLETED' },
+          },
+          {
+            $group: {
+              _id: '$client',
+              total: { $sum: '$total' },
+            },
+          },
+          {
+            $lookup: {
+              from: 'clients',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'client',
+            },
+          },
+          {
+            $sort: { total: -1 },
+          },
+        ]);
+
+        return clients;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getBestExecutives: async () => {
+      try {
+        const executives = await OrderModel.aggregate([
+          {
+            $match: { state: 'COMPLETED' },
+          },
+          {
+            $group: {
+              _id: '$executive',
+              total: { $sum: '$total' },
+            },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'executive',
+            },
+          },
+          {
+            $limit: 3,
+          },
+          {
+            $sort: { total: -1 },
+          },
+        ]);
+
+        return executives;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getProductByName: async (_, { text }) => {
+      try {
+        const products = await ProductModel.find({ $text: { $search: text } });
+
+        return products;
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 };
 
