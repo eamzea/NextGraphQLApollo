@@ -59,6 +59,39 @@ const typeDef = gql`
     phone: String
   }
 
+  type Order {
+    id: ID
+    orders: [OrdersGroup]
+    total: Float
+    client: ID
+    executive: ID
+    date: String
+    state: OrderState
+  }
+
+  type OrdersGroup {
+    id: ID
+    quantity: Int
+  }
+
+  input OrderProductInput {
+    id: ID
+    quantity: Int
+  }
+
+  input OrderInput {
+    orders: [OrderProductInput]
+    total: Float
+    client: ID
+    state: OrderState
+  }
+
+  enum OrderState {
+    PENDING
+    COMPLETED
+    CANCELED
+  }
+
   type Query {
     getUser(token: String!): User
     getProducts: [Product]
@@ -66,6 +99,10 @@ const typeDef = gql`
     getClients: [Client]
     getClient(id: ID!): Client
     getExecutiveClients: [Client]
+    getOrders: [Order]
+    getExecutiveOrders: [Order]
+    getOrder(id: ID!): Order
+    getOrderByState(state: String!): [Order]
   }
 
   type Mutation {
@@ -80,6 +117,13 @@ const typeDef = gql`
 
     #Clients
     newClient(input: ClientInput!): Client
+    updateClient(id: ID!, input: ClientInput): Client
+    deleteClient(id: ID!): Client
+
+    #Orders
+    newOrder(input: OrderInput!): Order
+    updateOrder(id: ID!, input: OrderInput!): Order
+    deleteOrder(id: ID!): Order
   }
 `;
 

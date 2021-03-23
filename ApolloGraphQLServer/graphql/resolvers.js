@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const { createToken, validateToken } = require('../token/actions');
 const ProductModel = require('../models/ProductModel');
 const ClientModel = require('../models/ClientModel');
+const OrderModel = require('../models/OrderModel');
 
 const resolvers = {
   Mutation: {
@@ -20,9 +21,9 @@ const resolvers = {
 
       try {
         const user = new UserModel(input);
-        const newUser = await newUser.save();
+        await user.save();
 
-        return newUser;
+        return user;
       } catch (error) {
         console.log(error);
       }
@@ -109,6 +110,162 @@ const resolvers = {
         console.log(error);
       }
     },
+    updateClient: async (_, { id, input }, ctx) => {
+      const { user } = ctx;
+
+      try {
+        let client = await ClientModel.findById(id);
+
+        if (!client) {
+          throw new Error('There is not a Client registered');
+        }
+
+        if (client.executive.toString() !== user.id) {
+          throw new Error('This Client does not belongs to this user');
+        }
+
+        let updatedClient = await ClientModel.findByIdAndUpdate(id, input, {
+          new: true,
+        });
+
+        return updatedClient;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    deleteClient: async (_, { id }, ctx) => {
+      const { user } = ctx;
+
+      console.log(user);
+
+      try {
+        let client = await ClientModel.findById(id);
+
+        if (!client) {
+          throw new Error('There is not a Client registered');
+        }
+
+        console.log(client);
+
+        if (client.executive.toString() !== user.id) {
+          throw new Error('This Client does not belongs to this user');
+        }
+
+        product = await ClientModel.findByIdAndDelete(id);
+
+        return product;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    newOrder: async (_, { input }, ctx) => {
+      const { user } = ctx;
+      const { client } = input;
+
+      try {
+        let existClient = await ClientModel.findById(client);
+
+        if (!existClient) {
+          throw new Error('There is not a Client registered');
+        }
+
+        if (existClient.executive.toString() !== user.id) {
+          throw new Error('This Client does not belongs to this user');
+        }
+
+        // Check stock
+
+        for await (const product of input.orders) {
+          const { id } = product;
+
+          const prod = await ProductModel.findById(id);
+
+          if (product.quantity > prod.inventory) {
+            throw new Error(
+              `The product: ${prod.name} exceeds the available quantity`
+            );
+          } else {
+            prod.inventory = prod.inventory - product.quantity;
+            await prod.save();
+          }
+        }
+
+        const order = await OrderModel(input);
+
+        order.executive = user.id;
+
+        await order.save();
+
+        return order;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    updateOrder: async (_, { id, input }, ctx) => {
+      const { user } = ctx;
+
+      try {
+        const order = await OrderModel.findById(id);
+        const client = await ClientModel.findById(order.client);
+
+        if (!order) {
+          throw new Error('There is not a Order with this ID');
+        }
+
+        if (order.executive.toString() !== user.id) {
+          throw new Error('You are not authorized to see this information');
+        }
+
+        if (!client) {
+          throw new Error('There is not a Client with this ID');
+        }
+
+        if (client.executive.toString() !== user.id) {
+          throw new Error('You are not authorized to see this information');
+        }
+
+        for await (const product of order.orders) {
+          const { id } = product;
+
+          const prod = await ProductModel.findById(id);
+
+          if (product.quantity > prod.inventory) {
+            throw new Error(
+              `The product: ${prod.name} exceeds the available quantity`
+            );
+          } else {
+            prod.inventory = prod.inventory - product.quantity;
+            await prod.save();
+          }
+        }
+
+        const orderUpdated = await OrderModel.findByIdAndUpdate(id, input, {
+          new: true,
+        });
+
+        return orderUpdated;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    deleteOrder: async (_, { id }, ctx) => {
+      const { user } = ctx;
+      try {
+        const order = await OrderModel.findById(id);
+
+        if (!order) {
+          throw new Error('There is not a Order with this ID');
+        }
+
+        if (order.executive.toString() !== user.id) {
+          throw new Error('You are not authorized to see this information');
+        }
+
+        const removedOrder = await OrderModel.findByIdAndDelete(id);
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
   Query: {
     getUser: async (_, { token }) => {
@@ -173,6 +330,57 @@ const resolvers = {
         const clients = await ClientModel.find({ executive: id });
 
         return clients;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getOrders: async () => {
+      try {
+        const orders = await OrderModel.find();
+
+        return orders;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getExecutiveOrders: async (_, {}, ctx) => {
+      const { user } = ctx;
+      try {
+        const orders = await OrderModel.find({ executive: user.id });
+
+        return orders;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getOrder: async (_, { id }, ctx) => {
+      const { user } = ctx;
+      try {
+        const order = await OrderModel.findById(id);
+
+        if (!order) {
+          throw new Error('There is not a Order with this ID');
+        }
+
+        if (order.executive.toString() !== user.id) {
+          throw new Error('You are not authorized to see this information');
+        }
+
+        return order;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getOrderByState: async (_, { state }, ctx) => {
+      const { user } = ctx;
+      try {
+        const order = await OrderModel.find({ state, executive: user.id });
+
+        if (!order) {
+          throw new Error('There is not a Order with this ID');
+        }
+
+        return order;
       } catch (error) {
         console.log(error);
       }
