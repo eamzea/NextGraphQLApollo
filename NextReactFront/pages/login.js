@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -30,7 +30,9 @@ const Login = () => {
       const { email, password } = values;
       try {
         const {
-          data: { authenticate: token },
+          data: {
+            authenticate: { token },
+          },
         } = await authenticate({
           variables: {
             input: {
