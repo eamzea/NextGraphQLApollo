@@ -268,11 +268,7 @@ const resolvers = {
     },
   },
   Query: {
-    getUser: async (_, { token }) => {
-      const userID = await validateToken(token, process.env.SECRET_WORD);
-
-      return userID;
-    },
+    getUser: async (_, {}, ctx) => ctx.user,
     getProducts: async () => {
       try {
         const products = await ProductModel.find({});
