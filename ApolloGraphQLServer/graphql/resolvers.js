@@ -136,8 +136,6 @@ const resolvers = {
     deleteClient: async (_, { id }, ctx) => {
       const { user } = ctx;
 
-      console.log(user);
-
       try {
         let client = await ClientModel.findById(id);
 
@@ -145,15 +143,13 @@ const resolvers = {
           throw new Error('There is not a Client registered');
         }
 
-        console.log(client);
-
         if (client.executive.toString() !== user.id) {
           throw new Error('This Client does not belongs to this user');
         }
 
-        product = await ClientModel.findByIdAndDelete(id);
+        client = await ClientModel.findByIdAndDelete(id);
 
-        return product;
+        return client;
       } catch (error) {
         console.log(error);
       }
@@ -303,15 +299,15 @@ const resolvers = {
     },
     getClient: async (_, { id }, ctx) => {
       const { user } = ctx;
+
       try {
         const client = await ClientModel.findById(id);
-        console.log(client);
 
         if (!client) {
           throw new Error('There is not a Client with this ID');
         }
 
-        if (client.executive !== user.id) {
+        if (client.executive != user.id) {
           throw new Error('You are not authorized to see this information');
         }
 

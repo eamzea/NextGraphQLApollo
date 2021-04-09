@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { GET_EXECUTIVE_CLIENTS } from '../api/queries';
 import Layout from '../components/Layout/Layout';
 import Loading from '../components/common/Loading';
+import Client from '../components/Client';
 
 export default function Home() {
   const router = useRouter();
@@ -34,20 +35,16 @@ export default function Home() {
       <table className="table-auto shadow-md mt-10 w-full w-lg">
         <thead className="bg-gray-800">
           <tr className="text-white">
-            <td className="w-1/5 p-2">Name</td>
-            <td className="w-1/5 p-2">Email</td>
-            <td className="w-1/5 p-2">Company</td>
+            <td className="w-3/12 p-2 rounded-tl-lg">Name</td>
+            <td className="w-3/12 p-2">Company</td>
+            <td className="w-3/12 p-2">Email</td>
+            <td className="w-1/12 p-2 text-center">Edit</td>
+            <td className="w-1/12 p-2 text-center rounded-tr-lg">Delete</td>
           </tr>
         </thead>
         <tbody className="bg-white">
           {getExecutiveClients.map(client => (
-            <tr key={client.id}>
-              <td className="border px-4 py-2">
-                {client.name} {client.lastName}
-              </td>
-              <td className="border px-4 py-2">{client.company} </td>
-              <td className="border px-4 py-2">{client.email}</td>
-            </tr>
+            <Client key={client.id} client={client} />
           ))}
         </tbody>
       </table>

@@ -65,8 +65,8 @@ const Login = () => {
 
   const showError = () => {
     return (
-      <div className="bg-white py-2 px-3 w-full my-3 max-w-sm text-center mx-auto">
-        <p>{errorState}</p>
+      <div className="bg-white py-2 px-3 w-full my-3 max-w-sm text-center mx-auto shadow-md rounded-sm">
+        <p className="text-xl">{errorState}</p>
       </div>
     );
   };
@@ -129,7 +129,7 @@ const Login = () => {
             )}
             <input
               type="submit"
-              className="bg-gray-600 w-full mt-5 p-2 text-white uppercase cursor-pointer duration-500 hover:bg-gray-900"
+              className="bg-gray-600 rounded-sm w-full mt-5 p-2 text-white uppercase cursor-pointer duration-500 hover:bg-gray-900"
               value="Login"
             />
           </form>
