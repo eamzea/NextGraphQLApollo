@@ -3,42 +3,45 @@ import { useMutation, useQuery } from '@apollo/client';
 import * as Yup from 'yup';
 import { Formik, useFormik } from 'formik';
 import { useRouter } from 'next/router';
-import { GET_CLIENT, GET_EXECUTIVE_CLIENTS } from '../../api/queries';
+import {
+  GET_PRODUCT,
+  GET_EXECUTIVE_CLIENTS,
+  GET_PRODUCTS,
+} from '../../api/queries';
 import Layout from '../../components/Layout/Layout';
 import Loading from '../../components/common/Loading';
 import handleFocus from '../../utils/handleFocus';
 import Submit from '../../components/common/Submit';
-import { UPDATE_CLIENT } from '../../api/mutations';
+import { UPDATE_CLIENT, UPDATE_PRODUCT } from '../../api/mutations';
 
-const editClient = () => {
+const editProduct = () => {
   const [errorState, setErrorState] = useState(null);
   const router = useRouter();
 
   const nameInput = useRef(null);
-  const lastNameInput = useRef(null);
-  const companyInput = useRef(null);
-  const emailInput = useRef(null);
-  const phoneInput = useRef(null);
+  const priceInput = useRef(null);
+  const inventoryInput = useRef(null);
+  const descriptionInput = useRef(null);
 
   const {
     query: { id },
   } = router;
 
-  const { data, loading, error } = useQuery(GET_CLIENT, {
+  const { data, loading, error } = useQuery(GET_PRODUCT, {
     variables: {
       id,
     },
   });
-  const [updateClient] = useMutation(UPDATE_CLIENT, {
-    update(cache, { data: { updateClient } }) {
-      const { getExecutiveClients } = cache.readQuery({
-        query: GET_EXECUTIVE_CLIENTS,
+  const [updateProduct] = useMutation(UPDATE_PRODUCT, {
+    update(cache, { data: { updateProduct } }) {
+      const { getProducts } = cache.readQuery({
+        query: GET_PRODUCTS,
       });
 
       cache.writeQuery({
-        query: GET_EXECUTIVE_CLIENTS,
+        query: GET_PRODUCTS,
         data: {
-          getExecutiveClients: [...getExecutiveClients, UPDATE_CLIENT],
+          getProducts: [...getProducts, UPDATE_PRODUCT],
         },
       });
     },
@@ -48,43 +51,41 @@ const editClient = () => {
     return <Loading />;
   }
 
-  const { getClient } = data;
-  const { name, lastName, company, email, phone } = getClient;
+  const { getProduct } = data;
+  const { name, price, inventory, description } = getProduct;
 
   const schemaValidation = Yup.object({
     name: Yup.string().required('Name is required'),
-    lastName: Yup.string().required('Last Name is required'),
-    company: Yup.string().required('Company is required'),
-    email: Yup.string().email('Email not valid').required('Email is required'),
+    price: Yup.number().required('Price is required'),
+    inventory: Yup.string().required('Inventory is required'),
+    description: Yup.string().required('Description is required'),
   });
 
   const handleEdit = async (values, fns) => {
     nameInput.current.disabled = true;
-    lastNameInput.current.disabled = true;
-    companyInput.current.disabled = true;
-    emailInput.current.disabled = true;
-    phoneInput.current.disabled = true;
+    priceInput.current.disabled = true;
+    inventoryInput.current.disabled = true;
+    descriptionInput.current.disabled = true;
 
-    const { name, lastName, email, company, phone } = values;
+    const { name, price, inventory, description } = values;
     try {
-      const { data } = await updateClient({
+      const { data } = await updateProduct({
         variables: {
           id,
           input: {
             name,
-            lastName,
-            email,
-            company,
-            phone,
+            price,
+            inventory,
+            description,
           },
         },
       });
 
-      setErrorState(`Client edited`);
+      setErrorState(`Product edited`);
 
       setTimeout(() => {
         setErrorState(null);
-        router.push('/');
+        router.push('/products');
       }, 1500);
     } catch (error) {
       setErrorState(error.message.replace('Graphql error: ', ''));
@@ -104,14 +105,14 @@ const editClient = () => {
 
   return (
     <Layout>
-      <h1 className="text-2xl text-gray-800 font-light">Edit Client</h1>
+      <h1 className="text-2xl text-gray-800 font-light">Edit Product</h1>
       {errorState && showError()}
       <div className="flex flex-wrap justify-center mt-5">
         <div className="w-full max-w-lg">
           <Formik
             validationSchema={schemaValidation}
             enableReinitialize
-            initialValues={{ name, lastName, company, email, phone }}
+            initialValues={{ name, price, inventory, description }}
             onSubmit={handleEdit}
           >
             {props => {
@@ -131,7 +132,7 @@ const editClient = () => {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       id="name"
                       type="text"
-                      placeholder="Client Name"
+                      placeholder="Product Name"
                       readOnly
                       onFocus={handleFocus}
                       onChange={props.handleChange}
@@ -148,101 +149,81 @@ const editClient = () => {
                   <div className="mb-4 ">
                     <label
                       className="block text-gray-700 text-sm font-bold mb-2"
-                      htmlFor="lastName"
+                      htmlFor="price"
                     >
-                      Last Name
+                      Price
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      id="lastName"
+                      id="price"
                       type="text"
-                      placeholder="Client Last Name"
+                      placeholder="Product Price"
                       readOnly
                       onFocus={handleFocus}
                       onChange={props.handleChange}
                       onBlur={props.handleBlur}
-                      ref={lastNameInput}
-                      value={props.values.lastName}
+                      ref={priceInput}
+                      value={props.values.price}
                     />
                   </div>
-                  {props.touched.lastName && props.errors.lastName && (
+                  {props.touched.price && props.errors.price && (
                     <div className="my-1 bg-red-100 border-l-2 border-red-500 text-red-700 text-xs p-2">
-                      <p>{props.errors.lastName}</p>
+                      <p>{props.errors.price}</p>
                     </div>
                   )}
                   <div className="mb-4 ">
                     <label
                       className="block text-gray-700 text-sm font-bold mb-2"
-                      htmlFor="company"
+                      htmlFor="inventory"
                     >
-                      Company
+                      Inventory
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      id="company"
+                      id="inventory"
                       type="text"
-                      placeholder="Client Company"
+                      placeholder="Product Inventory"
                       readOnly
                       onFocus={handleFocus}
                       onChange={props.handleChange}
                       onBlur={props.handleBlur}
-                      ref={companyInput}
-                      value={props.values.company}
+                      ref={inventoryInput}
+                      value={props.values.inventory}
                     />
                   </div>
-                  {props.touched.company && props.errors.company && (
+                  {props.touched.inventory && props.errors.inventory && (
                     <div className="my-1 bg-red-100 border-l-2 border-red-500 text-red-700 text-xs p-2">
-                      <p>{props.errors.company}</p>
+                      <p>{props.errors.inventory}</p>
                     </div>
                   )}
                   <div className="mb-4 ">
                     <label
                       className="block text-gray-700 text-sm font-bold mb-2"
-                      htmlFor="email"
+                      htmlFor="description"
                     >
-                      Email
+                      Description
                     </label>
                     <input
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      id="email"
-                      type="email"
-                      placeholder="Client Email"
+                      id="description"
+                      type="text"
+                      placeholder="Product Description"
                       readOnly
                       onFocus={handleFocus}
                       onChange={props.handleChange}
                       onBlur={props.handleBlur}
-                      ref={emailInput}
-                      value={props.values.email}
+                      ref={descriptionInput}
+                      value={props.values.description}
                     />
                   </div>
-                  {props.touched.email && props.errors.email && (
+                  {props.touched.description && props.errors.description && (
                     <div className="my-1 bg-red-100 border-l-2 border-red-500 text-red-700 text-xs p-2">
-                      <p>{props.errors.email}</p>
+                      <p>{props.errors.description}</p>
                     </div>
                   )}
-                  <div className="mb-4 ">
-                    <label
-                      className="block text-gray-700 text-sm font-bold mb-2"
-                      htmlFor="phone"
-                    >
-                      Phone
-                    </label>
-                    <input
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      id="phone"
-                      type="string"
-                      placeholder="Client Phone"
-                      readOnly
-                      onFocus={handleFocus}
-                      onChange={props.handleChange}
-                      onBlur={props.handleBlur}
-                      ref={phoneInput}
-                      value={props.values.phone}
-                    />
-                  </div>
                   <Submit
                     classes="bg-gray-800 w-full mt-5 p-2 text-white uppercase cursor-pointer rounded-sm shadow-md duration-500 hover:bg-gray-900 hover:shadow-xl hover:scale-105 transform"
-                    title="Edit Client"
+                    title="Edit Product"
                   />
                 </form>
               );
@@ -254,4 +235,4 @@ const editClient = () => {
   );
 };
 
-export default editClient;
+export default editProduct;

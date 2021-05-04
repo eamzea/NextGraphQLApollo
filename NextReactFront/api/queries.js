@@ -34,3 +34,25 @@ export const GET_CLIENT = gql`
     }
   }
 `;
+
+export const GET_PRODUCT = gql`
+  query getProduct($id: ID!) {
+    getProduct(id: $id) {
+      name
+      price
+      inventory
+      description
+    }
+  }
+`;
+
+export const GET_PRODUCTS = gql`
+  {
+    getProducts {
+      id
+      name
+      price
+      inventory
+    }
+  }
+`;
