@@ -29,7 +29,6 @@ const OrderReducer = (state = OrderInitialState, action) => {
       };
       break;
     case types.UpdateTotal:
-      console.log('call');
       return {
         ...state,
         total: state.products.reduce(
