@@ -21,7 +21,7 @@ const OrderSchema = mongoose.Schema({
   },
   state: {
     type: String,
-    default: 'PENDING ',
+    default: 'PENDING',
   },
   createdAt: {
     type: Date,

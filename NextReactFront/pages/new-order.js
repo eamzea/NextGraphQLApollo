@@ -9,14 +9,28 @@ import AssignProducts from '../components/orders/AssignProducts';
 import Resume from '../components/orders/Resume';
 import Total from '../components/orders/Total';
 import Swal from 'sweetalert2';
+import { GET_EXECUTIVE_ORDERS } from '../api/queries';
 
-const neworder = () => {
+const newOrder = () => {
   const {
     state: { total, client, products },
     actions,
     dispatch,
   } = useContext(OrderContext);
-  const [newOrder] = useMutation(NEW_ORDER);
+  const [newOrder] = useMutation(NEW_ORDER, {
+    update(cache, { data: { newOrder } }) {
+      const { getExecutiveOrders } = cache.readQuery({
+        query: GET_EXECUTIVE_ORDERS,
+      });
+
+      cache.writeQuery({
+        query: GET_EXECUTIVE_ORDERS,
+        data: {
+          getExecutiveOrders: [...getExecutiveOrders, newOrder],
+        },
+      });
+    },
+  });
   const [msgState, setMsgState] = useState(null);
   const router = useRouter();
 
@@ -82,4 +96,4 @@ const neworder = () => {
   );
 };
 
-export default neworder;
+export default newOrder;

@@ -230,7 +230,12 @@ const resolvers = {
               `The product: ${prod.name} exceeds the available quantity`
             );
           } else {
-            prod.inventory = prod.inventory - product.quantity;
+            if (input.state === 'CANCELED') {
+              prod.inventory = prod.inventory + product.quantity;
+            }
+            if (input.state === 'PENDING') {
+              prod.inventory = prod.inventory - product.quantity;
+            }
             await prod.save();
           }
         }
@@ -258,6 +263,8 @@ const resolvers = {
         }
 
         const removedOrder = await OrderModel.findByIdAndDelete(id);
+
+        return removedOrder;
       } catch (error) {
         console.log(error);
       }
@@ -338,7 +345,9 @@ const resolvers = {
     getExecutiveOrders: async (_, {}, ctx) => {
       const { user } = ctx;
       try {
-        const orders = await OrderModel.find({ executive: user.id });
+        const orders = await OrderModel.find({ executive: user.id }).populate(
+          'client'
+        );
 
         return orders;
       } catch (error) {

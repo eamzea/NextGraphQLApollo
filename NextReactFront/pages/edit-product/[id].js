@@ -75,7 +75,7 @@ const editProduct = () => {
           input: {
             name,
             price,
-            inventory,
+            inventory: inventory * 1,
             description,
           },
         },

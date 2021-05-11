@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import { GET_PRODUCTS } from '../api/queries';
 import Loading from '../components/common/Loading';
 import Layout from '../components/Layout/Layout';
@@ -8,7 +9,13 @@ import Product from '../components/Product';
 
 const Products = () => {
   const router = useRouter();
-  const { data, loading, error } = useQuery(GET_PRODUCTS);
+  const { data, loading, error, startPolling, stopPolling } =
+    useQuery(GET_PRODUCTS);
+
+  useEffect(() => {
+    startPolling(500);
+    return () => stopPolling();
+  }, [startPolling, stopPolling]);
 
   if (loading) {
     return <Loading />;

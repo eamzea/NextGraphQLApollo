@@ -44,7 +44,7 @@ const Login = () => {
 
         setErrorState(`Welcome !`);
 
-        localStorage.setItem('token', token);
+        setTimeout(() => localStorage.setItem('token', token), 1000);
 
         setTimeout(() => {
           setErrorState(null);

@@ -73,7 +73,7 @@ const typeDef = gql`
     id: ID
     orders: [OrdersGroup]
     total: Float
-    client: ID
+    client: Client
     executive: ID
     date: String
     state: OrderState
@@ -82,6 +82,7 @@ const typeDef = gql`
   type OrdersGroup {
     id: ID
     quantity: Int
+    name: String
   }
 
   input OrderProductInput {

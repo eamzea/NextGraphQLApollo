@@ -56,3 +56,47 @@ export const GET_PRODUCTS = gql`
     }
   }
 `;
+
+export const GET_EXECUTIVE_ORDERS = gql`
+  {
+    getExecutiveOrders {
+      client {
+        id
+        name
+        lastName
+        email
+        phone
+      }
+      id
+      orders {
+        id
+        quantity
+        name
+      }
+      total
+      state
+    }
+  }
+`;
+
+export const GET_BEST_CLIENTS = gql`
+  {
+    getBestClients {
+      client {
+        name
+      }
+      total
+    }
+  }
+`;
+
+export const GET_BEST_EXECUTIVES = gql`
+  {
+    getBestExecutives {
+      total
+      executive {
+        name
+      }
+    }
+  }
+`;
